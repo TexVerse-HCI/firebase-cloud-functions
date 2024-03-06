@@ -70,7 +70,7 @@ def texVerse_ai_QA(req: https_fn.Request) -> https_fn.Response:
     # print(query_results)
     # contexts = [item['metadata']['abstract'] for item in query_results['matches']]
     contexts = [item['metadata']['text'] for item in query_results['matches']]
-    dois = [item['doi'] for item in query_results['matches']]
+    dois = [f'<a href="https://doi.org/10.1145/{item["metadata"]["doi"]}" target="_blank">https://doi.org/10.1145/{item["metadata"]["doi"]}</a>' for item in query_results['matches']]
 
     # combine the contexts and the question
     context_combined = "\n".join(contexts)
@@ -79,7 +79,7 @@ def texVerse_ai_QA(req: https_fn.Request) -> https_fn.Response:
     response = openai_client.chat.completions.create(
         model="gpt-3.5-turbo", 
         messages=[
-            {"role": "system", "content": "You are a helpful research assistant and an expert in textile research and HCI research."},
+            {"role": "system", "content": "You are a helpful research assistant and an expert in textile research and HCI research. Based on the given context, answer the question, be creative and provide as much information as possible please."},
             {"role": "user", "content": chat_input}
         ],
         #   prompt=chat_input,
@@ -90,7 +90,7 @@ def texVerse_ai_QA(req: https_fn.Request) -> https_fn.Response:
     answer = response.choices[0].message.content
 
     # include the DOIs of the most relevant papers
-    answer = f"{answer}\n\n ### DOIs of the most relevant papers:\n" + "\n - ".join(dois)
+    answer = f"{answer}\n\n### DOIs of the most relevant papers:\n" + "- " + "\n- ".join(dois)
 
     print(answer)
     
